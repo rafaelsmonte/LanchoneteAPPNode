@@ -16,9 +16,16 @@ exports.post = (req, res, next) => {
     });
 };
 exports.get = (req, res, next) => {
-  res.status(200).send({
-    Nome: "XSalada",
-    Preço: 10
-  });
+  Produto
+    .find()
+    .then(data => {
+      res.status(201).send(data);
+    })
+    .catch(e => {
+      res.status(400).send({
+        Mensagem: "Erro ao listar  os produtos",
+        Data: e
+      });
+    });
 };
 
