@@ -1,6 +1,6 @@
 'use strict'
 const express = require('express');
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
 
 
@@ -27,9 +27,12 @@ var url =
 
 //controller
 const Produto = require('./models/produto');
+const Login = require('./models/login');
+
 //Rotas
-const rotaIndex = require('../src/routes/rotateste');
-const rotaProdutos = require('../src/routes/rotaprodutos');
+const rotaIndex = require('./routes/rotaTeste');
+const rotaProdutos = require('./routes/rotaProdutos');
+const rotaLogin = require('../src/routes/rotaLogin');
 
 app.use(bodyparser.json({
   limit: '5mb'
@@ -40,5 +43,7 @@ app.use(bodyparser.urlencoded({
 
 app.use('/',rotaIndex);
 app.use('/Produtos',rotaProdutos);
+app.use('/Login',rotaLogin);
+
 
 module.exports = app;
