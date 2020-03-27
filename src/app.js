@@ -2,15 +2,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
+const mongoConfig = require('./config/mongoConfig');
 
 
 const app = express();
 //Conectar Banco
-var url =
-    "mongodb+srv://rafael:rafael@lanchoneteapp-xocup.gcp.mongodb.net/test?retryWrites=true&w=majority";
-  mongoose.Promise = global.Promise;
   mongoose
-    .connect(url, {
+    .connect(mongoConfig.url, {
       useNewUrlParser: true,
       useFindAndModify: false,
       useUnifiedTopology: true
