@@ -3,5 +3,5 @@ const router = express.Router();
 const controller = require('../controllers/produtosController')
 
 router.get('/', controller.get);
-router.post('/', controller.post);
+router.post('/Cadastrar', controller.post);
 module.exports = router;

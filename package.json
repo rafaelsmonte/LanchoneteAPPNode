@@ -2,7 +2,7 @@
   "name": "lanchonete",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./bin/server.js",
   "scripts": {
     "start": "node ./bin/server.js"
   },
@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "debug": "^4.1.1",
     "express": "^4.17.1",
