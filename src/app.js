@@ -7,6 +7,7 @@ const mongoConfig = require('./config/mongoConfig');
 
 const app = express();
 //Conectar Banco
+console.log(mongoConfig.url);
   mongoose
     .connect(mongoConfig.url, {
       useNewUrlParser: true,

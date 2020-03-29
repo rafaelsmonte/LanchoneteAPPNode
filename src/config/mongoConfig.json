@@ -1,6 +1,3 @@
 {
-    
-    "user": "rafael",
-    "senha": "rafael",
-    "url": "mongodb+srv://{user}:{senha}@lanchoneteapp-xocup.gcp.mongodb.net/test?retryWrites=true&w=majority"
+    "url": "mongodb+srv://rafael:rafael@lanchoneteapp-xocup.gcp.mongodb.net/test?retryWrites=true&w=majority"
 }

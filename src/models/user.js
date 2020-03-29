@@ -25,6 +25,14 @@ const schema = new Schema({
     dataCriacao: {
         type: Date,
         default: Date.now,
+    },
+    email:{
+        type: String,
+        required: [true, 'Email deve ser informado'],
+        trim: true,
+        lowercase: true,
+        unique: [true, 'Email existente'],
+
     }
 
 
