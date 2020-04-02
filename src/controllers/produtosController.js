@@ -29,3 +29,18 @@ exports.get = (req, res, next) => {
     });
 };
 
+exports.getById = (req, res, next) => {
+  Produto.findOne(
+    {
+      _id:req.params.id
+    }).then(data=> {
+      res.status(200).send(data);
+    }).catch(e=>{
+      res.status(400).send({
+        Mensagem: "Erro ao listar o produto",
+        Data: e
+      });
+    });
+};
+
+
