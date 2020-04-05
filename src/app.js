@@ -2,14 +2,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
-const mongoConfig = require('./config/mongoConfig');
+require('dotenv').config();
 
 
 const app = express();
 //Conectar Banco
-console.log(mongoConfig.url);
+console.log(process.env.URL_BANCO);
   mongoose
-    .connect(mongoConfig.url, {
+    .connect(process.env.URL_BANCO, {
       useNewUrlParser: true,
       useFindAndModify: false,
       useUnifiedTopology: true

@@ -2,10 +2,12 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const authConfig = require("../config/auth");
+require('dotenv').config();
+
+
 
 function gerarToken(user = {}) {
-  return jwt.sign({ id: user.id }, authConfig.secret,
+  return jwt.sign({ id: user.id }, process.env.SECRET,
     {
       expiresIn: 86400,
     });
