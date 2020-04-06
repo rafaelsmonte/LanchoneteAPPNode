@@ -7,4 +7,6 @@ router.get('/', controller.get);
 router.post('/cadastrar', controller.post);
 router.post('/auth', controller.auth);
 router.put('/atualizaToken', controller.atualizaToken);
+router.post('/resetasenha', controller.enviaEmailConfirmacao);
+
 module.exports = router;

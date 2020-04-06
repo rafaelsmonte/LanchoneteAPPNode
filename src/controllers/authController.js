@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 require('dotenv').config();
 
 
@@ -12,8 +13,6 @@ function gerarToken(user = {}) {
       expiresIn: 86400,
     });
 }
-
-
 exports.get = (req, res, next) => {
   User
     .find()
@@ -77,21 +76,48 @@ exports.atualizaToken = async (req, res, next) => {
   if (!user)
     return res.status(400).send({ error: "Erro ao encontrar o usuário" });
   return res.status(200).send({ user, token: gerarToken({ user: user }) });
-}
+};
 
-/*
-const user = await User.find({ login, token } || "")
-.catch(e => {
-res.status(400).send({
-Mensagem: "Erro ao encontrar o usuário",
-Data: e
-});
-});
-if (!user)
-return res.status(400).send({ error: "Erro ao encontrar o usuário" });
-user.update({ login, token } || "", { $set: { token: gerarToken({ user: user }) } });
-}
-*/
+exports.enviaEmailConfirmacao = async (req, res, next) => {
+  const { login, email } = req.body;
+  if (!login || !email)
+    return res.status(400).send({ error: "Login ou Email não informados" });
+  const user = await User.findOne({ login, email })
+    .catch(e => {
+      res.status(400).send({
+        error: e
+      });
+    });
+  if (!user)
+    return res.status(400).send({ error: "Usuário não encontrado" });
+
+  const transporter = nodemailer.createTransport({
+    service: process.env.SERVICE_EMAIL,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.SENHA_EMAIL
+    }
+  });
+
+  const conteudoEmail = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Reset de Senha",
+    text: "Mensagem automatica de reset de senha"
+  };
+  transporter.sendMail(conteudoEmail, (err) => {
+    if (err)
+      return res.status(400).send({ error: "Erro ao enviar o email de confirmação" });
+  });
+  return res.status(200).send({Mensagem: "Mensagem enviada com sucesso"});
+  /*var d1 = new Date();
+d1.setMinutes(d1.getMinutes()+30);
+d1 = new Date(d1);
+console.log(d1);*/
+};
+
+
+
 
 
 
