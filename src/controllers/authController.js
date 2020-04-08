@@ -3,6 +3,7 @@ const User = mongoose.model("User");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const TokenResetSenha = mongoose.model("TokenResetSenha");
 require('dotenv').config();
 
 
@@ -20,7 +21,7 @@ exports.get = (req, res, next) => {
       res.status(201).send(data);
     })
     .catch(e => {
-      res.status(400).send({
+      return res.status(400).send({
         Mensagem: "Erro ao listar  os usuarios",
         Data: e
       });
@@ -38,7 +39,7 @@ exports.post = (req, res, next) => {
         });
     })
     .catch(e => {
-      res.status(400).send({
+      return res.status(400).send({
         Mensagem: "Erro ao cadastrar o usuario",
         Data: e
       });
@@ -48,7 +49,7 @@ exports.auth = async (req, res, next) => {
   const { login, senha } = req.body;
   const user = await User.findOne({ login } || "").select('+senha')
     .catch(e => {
-      res.status(400).send({
+      return res.status(400).send({
         Mensagem: "Erro ao autenticar o usuário",
         Data: e
       });
@@ -68,7 +69,7 @@ exports.atualizaToken = async (req, res, next) => {
 
   const user = await User.findOne({ login } || "")
     .catch(e => {
-      res.status(400).send({
+      return res.status(400).send({
         Mensagem: "Erro ao encontrar o usuário",
         Data: e
       });
@@ -80,16 +81,44 @@ exports.atualizaToken = async (req, res, next) => {
 
 exports.enviaEmailConfirmacao = async (req, res, next) => {
   const { login, email } = req.body;
+  var dataExpiracao = new Date();
+  var id;
+  dataExpiracao.setMinutes(dataExpiracao.getMinutes() + 30);
+  dataExpiracao = new Date(dataExpiracao);
+
   if (!login || !email)
     return res.status(400).send({ error: "Login ou Email não informados" });
   const user = await User.findOne({ login, email })
     .catch(e => {
-      res.status(400).send({
+      return res.status(400).send({
         error: e
       });
     });
   if (!user)
     return res.status(400).send({ error: "Usuário não encontrado" });
+  var tokenResetSenha = await TokenResetSenha.findOne({ login, dataExpiracao: { "$gte": new Date() } })
+    .catch(e => {
+      return res.status(400).send({
+        error: e
+      });
+    });
+  if (!tokenResetSenha) {
+    var novoTokenResetSenha = new TokenResetSenha();
+    novoTokenResetSenha.dataExpiracao = dataExpiracao;
+    novoTokenResetSenha.login = login;
+    novoTokenResetSenha = await novoTokenResetSenha.save()
+      .catch(e => {
+        return res.status(400).send({
+          error: e
+        });
+      });
+    id = novoTokenResetSenha._id;
+    console.log('gerou novo:' + id);
+
+  } else {
+    id = tokenResetSenha._id;
+    console.log('gerou novo:' + id);
+  }
 
   const transporter = nodemailer.createTransport({
     service: process.env.SERVICE_EMAIL,
@@ -103,22 +132,38 @@ exports.enviaEmailConfirmacao = async (req, res, next) => {
     from: process.env.EMAIL,
     to: email,
     subject: "Reset de Senha",
-    text: "Mensagem automatica de reset de senha"
+    text: "Mensagem automatica de reset de senha -- Token: " + id
   };
   transporter.sendMail(conteudoEmail, (err) => {
     if (err)
       return res.status(400).send({ error: "Erro ao enviar o email de confirmação" });
   });
-  return res.status(200).send({Mensagem: "Mensagem enviada com sucesso"});
-  /*var d1 = new Date();
-d1.setMinutes(d1.getMinutes()+30);
-d1 = new Date(d1);
-console.log(d1);*/
+  return res.status(200).send({ Mensagem: "Mensagem enviada com sucesso" });
+
 };
 
+exports.verificaCodigoResetSenha = async (req, res, next) => {
+  const { _id, login, senha } = req.body;
+  const tokenResetSenha = await TokenResetSenha.findOne({ _id, login } || "")
+    .catch(e => {
+      return res.status(400).send({
+        error: e
+      });
+    });
+  if (!tokenResetSenha)
+    return res.status(400).send({ error: "Código não encontrado" });
 
+  if (new Date(tokenResetSenha.dataExpiracao) < new Date())
+    return res.status(400).send({ error: "Token Expirou" });
 
+  const user = await User.updateOne({ login }, { $set: { senha: senha } })
+    .catch(e => {
+      return res.status(400).send({
+        error: e
+      });
+    });
 
-
-
-
+  if (!user)
+    return res.status(400).send({ error: "Erro ao encontrar o usuário" });
+  return res.status(200).send({ Mensagem: "Senha alterada com sucesso" });
+};

@@ -23,10 +23,10 @@ console.log(process.env.URL_BANCO);
 
 
 
-
 //controller
 const Produto = require('./models/produto');
 const User = require('./models/user');
+const TokenResetSenha = require('./models/tokenResetSenha');
 
 //Rotas
 const rotaIndex = require('./routes/rotaTeste');

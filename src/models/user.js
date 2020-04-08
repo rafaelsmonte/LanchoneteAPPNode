@@ -40,6 +40,13 @@ const schema = new Schema({
 schema.pre('save', async function(next)
 {
     const hash = await bcryptjs.hash(this.senha, 10);
+    console.log('has2h');
     this.senha = hash;
 });
+schema.pre('updateOne', async function(next)
+{
+    const hash = await bcryptjs.hash(this.getUpdate().$set.senha, 10);
+    this.getUpdate().$set.senha = hash;
+});
+
 module.exports = mongoose.model("User", schema);
