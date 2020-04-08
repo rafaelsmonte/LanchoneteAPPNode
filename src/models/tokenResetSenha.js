@@ -12,9 +12,12 @@ const schema = new Schema({
         required: [true, 'Login deve ser informado'],
         trim: true,
         lowercase: true,
+    },
+    token:{
+        type:String,
     }
 });
 
-schema.index({ dataExpiracao: 1 }, { expireAfterSeconds : 120 });
+schema.index({ dataExpiracao: 1 }, { expireAfterSeconds : 60*30 });
  
 module.exports = mongoose.model("TokenResetSenha", schema);
