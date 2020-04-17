@@ -29,7 +29,7 @@ exports.get = (req, res, next) => {
 };
 exports.post = (req, res, next) => {
   var user = new User(req.body);
-  const {senha} = req.body;
+  const { senha } = req.body;
   if (senha && (senha.length < 6 || senha.length > 12))
     return res.status(400).send({ error: "Senha deve ter entre 6 e 12 caracteres" });
   user
@@ -84,7 +84,7 @@ exports.put = async (req, res, next) => {
 };
 
 
-exports.atualizaToken = async (req, res, next) => {
+/*exports.atualizaToken = async (req, res, next) => {
   const { login } = req.body;
 
   const user = await User.findOne({ login } || "")
@@ -97,17 +97,21 @@ exports.atualizaToken = async (req, res, next) => {
   if (!user)
     return res.status(400).send({ error: "Erro ao encontrar o usuário" });
   return res.status(200).send({ user, token: gerarToken({ user: user }) });
-};
+};*/
 
 exports.enviaEmailConfirmacao = async (req, res, next) => {
-  const { login, email } = req.body;
-  var dataExpiracao = new Date();
-  var id;
-  dataExpiracao.setMinutes(dataExpiracao.getMinutes() + 30);
-  dataExpiracao = new Date(dataExpiracao);
+  const { login, email, senha } = req.body;
+  if (!senha)
+    return res.status(400).send({ error: "Senha nao informada" });
+  if (senha.length < 6 || senha.length > 12)
+    return res.status(400).send({ error: "Senha deve ter entre 6 e 12 caracteres" });
 
   if (!login || !email)
     return res.status(400).send({ error: "Login ou Email não informados" });
+  var dataExpiracao = new Date();
+  var token;
+  dataExpiracao.setMinutes(dataExpiracao.getMinutes() + 30);
+  dataExpiracao = new Date(dataExpiracao);
   const user = await User.findOne({ login, email })
     .catch(e => {
       return res.status(400).send({
@@ -132,12 +136,12 @@ exports.enviaEmailConfirmacao = async (req, res, next) => {
           error: e
         });
       });
-    id = novoTokenResetSenha._id;
-    console.log('gerou novo:' + id);
+    token = novoTokenResetSenha.token;
+    console.log('gerou novo:' + token);
 
   } else {
-    id = tokenResetSenha._id;
-    console.log('gerou novo:' + id);
+    token = tokenResetSenha.token;
+    console.log('nao gerou novo:' + token);
   }
 
   const transporter = nodemailer.createTransport({
@@ -152,7 +156,7 @@ exports.enviaEmailConfirmacao = async (req, res, next) => {
     from: process.env.EMAIL,
     to: email,
     subject: "Reset de Senha",
-    text: "Mensagem automatica de reset de senha -- Token: " + id
+    text: "Mensagem automatica de reset de senha -- Token: " + token
   };
   transporter.sendMail(conteudoEmail, (err) => {
     if (err)
@@ -163,8 +167,10 @@ exports.enviaEmailConfirmacao = async (req, res, next) => {
 };
 
 exports.verificaCodigoResetSenha = async (req, res, next) => {
-  const { _id, login, senha } = req.body;
-  const tokenResetSenha = await TokenResetSenha.findOne({ _id, login } || "")
+  const { token, login, senha } = req.body;
+
+
+  const tokenResetSenha = await TokenResetSenha.findOne({ token, login } || "")
     .catch(e => {
       return res.status(400).send({
         error: e
@@ -185,5 +191,12 @@ exports.verificaCodigoResetSenha = async (req, res, next) => {
 
   if (!user)
     return res.status(400).send({ error: "Erro ao encontrar o usuário" });
+
+    await TokenResetSenha.findOneAndDelete({ token, login })
+    .catch(e => {
+      return res.status(400).send({
+        error: e
+      });
+    });
   return res.status(200).send({ Mensagem: "Senha alterada com sucesso" });
 };
