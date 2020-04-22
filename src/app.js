@@ -23,11 +23,13 @@ mongoose
 const Produto = require("./models/produto");
 const User = require("./models/user");
 const TokenResetSenha = require("./models/tokenResetSenha");
+const Mesa = require("./models/mesa");
 
 //Rotas
 const rotaIndex = require("./routes/rotaTeste");
 const rotaProdutos = require("./routes/rotaProdutos");
 const rotaLogin = require("./routes/rotaUser");
+const rotaMesa = require("./routes/rotaMesa");
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded());
@@ -35,5 +37,6 @@ app.use(bodyparser.urlencoded());
 app.use("/", rotaIndex);
 app.use("/Produto", rotaProdutos);
 app.use("/User", rotaLogin);
+app.use("/Mesa", rotaMesa);
 
 module.exports = app;
